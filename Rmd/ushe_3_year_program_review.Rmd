@@ -1,0 +1,137 @@
+---
+title: "USHE Program Headcounts and Graduates"
+output: html_document
+runtime: shiny
+resource_files:
+- rscripts/*
+- sql/*
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+library(DT)
+library(shinyWidgets)
+source( here::here('rscripts', 'db_ops.R'))
+```
+
+# {.tabset}
+## All Relevant Data
+
+### Program Selection
+```{r}
+  programs <- get_current_programs()
+  programs <- sort(unique(programs$program_code))
+  pickerInput("program",  "Program Selection",
+              programs,
+              options=list(`actions-box`=TRUE, `live-search`=TRUE),
+              multiple=TRUE,
+              selected=programs[1]) 
+```
+
+### Headcounts By Program
+```{r}
+  DT::dataTableOutput("headcounts_by_program")
+  output$headcounts_by_program <- DT::renderDataTable({
+      df <- get_headcounts_by_program(input$program[1])
+      for (i in 2:length(input$program)) {
+        df <- merge(df, get_headcounts_by_program(input$program[i]), all= TRUE)
+      }
+      df <- df %>% 
+          group_by(term) %>%
+          summarise(third_week_headcount=sum(third_week_headcount))       
+      return(df)
+    }, rownames=FALSE)
+```
+### Headcounts By Department Given Program
+```{r}
+  DT::dataTableOutput("headcounts_by_department_given_program")
+  output$headcounts_by_department_given_program <- DT::renderDataTable({
+      df <- get_headcounts_by_department_given_program(input$program[1])
+      for (i in 2:length(input$program)) {
+        df <- merge(df, get_headcounts_by_department_given_program(input$program[i]), all= TRUE)
+      }
+      df <- df %>% 
+          group_by(term) %>%
+          summarise(third_week_headcount=sum(third_week_headcount))       
+      return(df)
+    }, rownames=FALSE)
+```
+### Graduates By Program
+```{r}
+  DT::dataTableOutput("graduates_by_program")
+   output$graduates_by_program <- DT::renderDataTable({
+      df <- get_graduates_by_program(input$program[1])
+      for (i in 2:length(input$program)) {
+        df <- merge(df, get_graduates_by_program(input$program[i]), all= TRUE)
+      }
+      df <- df %>%
+       group_by(academic_year) %>%
+       summarise(total_graduates=sum(total_graduates))     
+      return(df)
+    }, rownames=FALSE) 
+```
+### Graduates By Department Given Program
+```{r}
+  DT::dataTableOutput("graduates_by_department_given_program")
+  output$graduates_by_department_given_program <- DT::renderDataTable( get_graduates_by_department_given_program(input$program),
+                                                       rownames=FALSE)
+  output$graduates_by_department_given_program <- DT::renderDataTable({
+   df <- get_graduates_by_department_given_program(input$program[1])
+   for (i in 2:length(input$program)) {
+     df <- merge(df, get_graduates_by_department_given_program(input$program[i]), all= TRUE)
+   }
+   df <- df %>%
+     group_by(academic_year) %>%
+     summarise(total_graduates=sum(total_graduates))  
+   return(df)
+ }, rownames=FALSE) 
+```
+
+
+## Current Programs SQL and Data
+```{r sql_code, echo=FALSE}
+query <- read_file( here::here("sql", "current_programs.sql") )
+conn <- get_conn(dsn="BRPT") 
+```
+
+```{sql, connection=conn, code=query, eval=FALSE}
+```
+
+```{r}
+programs <- get_current_programs()
+DT::datatable(programs, rownames=FALSE)
+```
+
+## Relevant Parameterized SQL
+### Headcounts By Program
+```{r echo=FALSE}
+query <- read_file( here::here("sql", "headcounts_by_program.sql") )
+conn <- get_conn(dsn="BRPT") 
+```
+```{sql, connection=conn, code=query, eval=FALSE}
+```
+### Headcounts By Department Given Program
+```{r echo=FALSE}
+query <- read_file( here::here("sql", "headcounts_by_department_given_program.sql") )
+conn <- get_conn(dsn="BRPT") 
+```
+```{sql, connection=conn, code=query, eval=FALSE}
+```
+### Graduates By Program
+```{r echo=FALSE}
+query <- read_file( here::here("sql", "graduates_by_program.sql") )
+conn <- get_conn(dsn="BRPT") 
+```
+```{sql, connection=conn, code=query, eval=FALSE}
+```
+### Graduates By Department Given Program
+```{r echo=FALSE}
+query <- read_file( here::here("sql", "graduates_by_department_given_program.sql") )
+conn <- get_conn(dsn="BRPT") 
+```
+```{sql, connection=conn, code=query, eval=FALSE}
+```
+
+
+\
+\

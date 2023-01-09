@@ -1,0 +1,121 @@
+---
+title: "NCAA Report"
+author: Office of Institutional Effectiveness
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: true
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+source(here::here("r", 'pull.R'))
+source(here::here("r", 'mung.R'))
+library(writexl)
+```
+
+```{r code}
+
+graduation_dataset <- get_graduation_dataset(graduation_full_edify_df, 
+                                             enrollment_check_term='202140')
+
+ncaa_student_athletes <- load_data_from_xlsx("studentathleteexport.xlsx") %>%
+  rename(student_id="Student Id")
+
+# Please don't use the merge function use the left join right join from dplyr
+ncaa_report <- merge(x = ncaa_student_athletes, 
+                     y = graduation_dataset, 
+                     by = "student_id", 
+                     all.x = TRUE)
+
+# please don't update variables get a new variable name
+ncaa_report <- ncaa_report %>%
+  mutate(is_graduated = ( highest_earned_degree_6_year_status=="Bachelors" ),
+         is_exclusion = ipeds_exclusion_ind )
+
+ncaa_graduation_rate_success_report <- ncaa_report %>% 
+  select(student_id, is_graduated, is_exclusion) %>% 
+  mutate(is_graduated = replace_na(is_graduated, FALSE)) %>% 
+  mutate(is_exclusion = replace_na(is_exclusion, FALSE)) %>%
+  unique() %>% 
+  left_join(ncaa_student_athletes, by = c("student_id"))
+
+# I need to know which students in the ncaa_report aren't in the graduation_dataset
+  
+
+# save report in xlsx format
+write_xlsx(ncaa_graduation_rate_success_report, here::here("reports", "ncaa", "ncaa_graduation_rate_success_report.xlsx"))
+
+```
+
+```{r code}
+
+graduation_dataset_current <- get_graduation_dataset(graduation_full_edify_df, 
+                                             enrollment_check_term='202140')
+
+ncaa_athletic_aid <- load_data_from_xlsx("Athletic_Aid_List_15-16 GSR.xlsx") %>%
+  rename(student_id="Dnumber")
+
+ncaa_athletic_aid %>%
+  group_by(student_id) %>%
+  filter(n()>1)
+
+ncaa_graduation_rate_athletic_aid_join <- ncaa_athletic_aid %>% 
+  left_join(graduation_dataset, by = c("student_id"))
+
+ncaa_graduation_rate_athletic_aid <-  ncaa_graduation_rate_athletic_aid_join %>% 
+  select(student_id, Sport, Gender, ipeds_race_ethnicity) %>% 
+  unique()
+
+ncaa_graduation_rate_athletic_aid %>%
+  group_by(student_id) %>%
+  filter(n()>1)
+
+# save report in xlsx format
+write_xlsx(ncaa_graduation_rate_athletic_aid, here::here("reports", "ncaa", "ncaa_graduation_rate_athletic_aid_report.xlsx"))
+
+sum_ncaa_graduation_rate_athletic_aid <- ncaa_graduation_rate_athletic_aid %>% 
+  count(Gender, Sport, ipeds_race_ethnicity)
+
+# save report in xlsx format
+write_xlsx(sum_ncaa_graduation_rate_athletic_aid, here::here("reports", "ncaa", "sum_ncaa_graduation_rate_athletic_aid_report.xlsx"))
+
+```
+
+```{r code}
+
+graduation_dataset_current <- get_graduation_dataset(graduation_full_edify_df, 
+                                             enrollment_check_term='202140')
+
+ncaa_athletic_aid_current <- load_data_from_xlsx("Athletic_Aid_List_2021-22.xlsx") %>%
+  rename(student_id="Dnumber")
+
+ncaa_athletic_aid_current %>%
+  group_by(student_id) %>%
+  filter(n()>1)
+
+ncaa_graduation_rate_athletic_aid_current_join <- ncaa_athletic_aid_current %>% 
+  left_join(graduation_dataset, by = c("student_id"))
+
+ncaa_graduation_rate_athletic_aid_current <-  ncaa_graduation_rate_athletic_aid_current_join %>% 
+  select(student_id, Sport, Gender, ipeds_race_ethnicity) %>% 
+  unique()
+
+ncaa_graduation_rate_athletic_aid_current %>%
+  group_by(student_id) %>%
+  filter(n()>1)
+
+# save report in xlsx format
+write_xlsx(ncaa_graduation_rate_athletic_aid_current, here::here("reports", "ncaa", "ncaa_graduation_rate_athletic_aid_current_report.xlsx"))
+
+sum_ncaa_graduation_rate_athletic_aid_current <- ncaa_graduation_rate_athletic_aid_current %>% 
+  count(Gender, Sport, ipeds_race_ethnicity)
+
+# save report in xlsx format
+write_xlsx(sum_ncaa_graduation_rate_athletic_aid_current, here::here("reports", "ncaa", "sum_ncaa_graduation_rate_athletic_aid_current_report.xlsx"))
+
+```

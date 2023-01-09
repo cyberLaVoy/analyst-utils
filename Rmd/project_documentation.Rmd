@@ -1,0 +1,65 @@
+---
+title: "Project Documentation"
+subtitle: "Statement of Purpose"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+author: Office of Institutional Effectiveness
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: true
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+```
+
+```{r code}
+###  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+library(here)
+source(here::here("rscript", "data_io_util.R"))
+
+# pull some data
+df <- get_data_from_sql_file(file_name="query.sql",
+                             dsn="REPT")
+# display data pulled in table
+DT::datatable(df, rownames=FALSE)
+
+```
+
+# Project Purpose
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Pulvinar neque laoreet suspendisse interdum consectetur libero id. Posuere lorem ipsum dolor sit. Fames ac turpis egestas integer eget aliquet. Turpis nunc eget lorem dolor sed viverra ipsum. Risus sed vulputate odio ut. Est ullamcorper eget nulla facilisi etiam. Ante metus dictum at tempor commodo ullamcorper. Semper risus in hendrerit gravida rutrum quisque. Tellus in hac habitasse platea dictumst vestibulum rhoncus. Nam aliquam sem et tortor consequat id. Eget duis at tellus at urna condimentum. Tellus rutrum tellus pellentesque eu tincidunt. Neque gravida in fermentum et sollicitudin ac orci phasellus egestas. Quis varius quam quisque id diam vel quam elementum. Enim ut tellus elementum sagittis vitae et leo.
+
+Quam vulputate dignissim suspendisse in est ante in nibh. Ornare suspendisse sed nisi lacus sed viverra tellus in. Et tortor consequat id porta. Placerat vestibulum lectus mauris ultrices eros. Felis eget velit aliquet sagittis id consectetur purus. Turpis nunc eget lorem dolor sed. Hendrerit dolor magna eget est. Gravida arcu ac tortor dignissim. Tempus quam pellentesque nec nam aliquam sem et tortor consequat. Pretium nibh ipsum consequat nisl vel pretium lectus quam. Sit amet nisl suscipit adipiscing. Habitant morbi tristique senectus et. Erat imperdiet sed euismod nisi porta lorem mollis. Nulla posuere sollicitudin aliquam ultrices sagittis. Id diam vel quam elementum pulvinar etiam non quam lacus. Nec tincidunt praesent semper feugiat. Aliquet sagittis id consectetur purus.
+
+## Data Sources
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Pulvinar neque laoreet suspendisse interdum consectetur libero id. Posuere lorem ipsum dolor sit. Fames ac turpis egestas integer eget aliquet. Turpis nunc eget lorem dolor sed viverra ipsum. Risus sed vulputate odio ut. Est ullamcorper eget nulla facilisi etiam. Ante metus dictum at tempor commodo ullamcorper. Semper risus in hendrerit gravida rutrum quisque. Tellus in hac habitasse platea dictumst vestibulum rhoncus. Nam aliquam sem et tortor consequat id. Eget duis at tellus at urna condimentum. Tellus rutrum tellus pellentesque eu tincidunt. Neque gravida in fermentum et sollicitudin ac orci phasellus egestas. Quis varius quam quisque id diam vel quam elementum. Enim ut tellus elementum sagittis vitae et leo.
+
+
+
+## Intended Audience
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Pulvinar neque laoreet suspendisse interdum consectetur libero id. Posuere lorem ipsum dolor sit. Fames ac turpis egestas integer eget aliquet. Turpis nunc eget lorem dolor sed viverra ipsum. Risus sed vulputate odio ut. Est ullamcorper eget nulla facilisi etiam. Ante metus dictum at tempor commodo ullamcorper. Semper risus in hendrerit gravida rutrum quisque. Tellus in hac habitasse platea dictumst vestibulum rhoncus. Nam aliquam sem et tortor consequat id. Eget duis at tellus at urna condimentum. Tellus rutrum tellus pellentesque eu tincidunt. Neque gravida in fermentum et sollicitudin ac orci phasellus egestas. Quis varius quam quisque id diam vel quam elementum. Enim ut tellus elementum sagittis vitae et leo.
+
+Quam vulputate dignissim suspendisse in est ante in nibh. Ornare suspendisse sed nisi lacus sed viverra tellus in. Et tortor consequat id porta. Placerat vestibulum lectus mauris ultrices eros. Felis eget velit aliquet sagittis id consectetur purus. Turpis nunc eget lorem dolor sed. Hendrerit dolor magna eget est. Gravida arcu ac tortor dignissim. Tempus quam pellentesque nec nam aliquam sem et tortor consequat. Pretium nibh ipsum consequat nisl vel pretium lectus quam. Sit amet nisl suscipit adipiscing. Habitant morbi tristique senectus et. Erat imperdiet sed euismod nisi porta lorem mollis. Nulla posuere sollicitudin aliquam ultrices sagittis. Id diam vel quam elementum pulvinar etiam non quam lacus. Nec tincidunt praesent semper feugiat. Aliquet sagittis id consectetur purus.
+
+# Project Timeline
+
+## Due Dates
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Pulvinar neque laoreet suspendisse interdum consectetur libero id. Posuere lorem ipsum dolor sit. Fames ac turpis egestas integer eget aliquet. Turpis nunc eget lorem dolor sed viverra ipsum. Risus sed vulputate odio ut. Est ullamcorper eget nulla facilisi etiam. Ante metus dictum at tempor commodo ullamcorper. 
+
+## Repetition Cycle
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Pulvinar neque laoreet suspendisse interdum consectetur libero id. Posuere lorem ipsum dolor sit. Fames ac turpis egestas integer eget aliquet. Turpis nunc eget lorem dolor sed viverra ipsum. Risus sed vulputate odio ut. Est ullamcorper eget nulla facilisi etiam. Ante metus dictum at tempor commodo ullamcorper. Semper risus in hendrerit gravida rutrum quisque. Tellus in hac habitasse platea dictumst vestibulum rhoncus. Nam aliquam sem et tortor consequat id. Eget duis at tellus at urna condimentum. Tellus rutrum tellus pellentesque eu tincidunt. Neque gravida in fermentum et sollicitudin ac orci phasellus egestas. Quis varius quam quisque id diam vel quam elementum. Enim ut tellus elementum sagittis vitae et leo.
+
+
+## Maintainance Notes
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Pulvinar neque laoreet suspendisse interdum consectetur libero id. Posuere lorem ipsum dolor sit. Fames ac turpis egestas integer eget aliquet. Turpis nunc eget lorem dolor sed viverra ipsum. Risus sed vulputate odio ut. Est ullamcorper eget nulla facilisi etiam. Ante metus dictum at tempor commodo ullamcorper. Semper risus in hendrerit gravida rutrum quisque. Tellus in hac habitasse platea dictumst vestibulum rhoncus. Nam aliquam sem et tortor consequat id. Eget duis at tellus at urna condimentum. Tellus rutrum tellus pellentesque eu tincidunt. Neque gravida in fermentum et sollicitudin ac orci phasellus egestas. Quis varius quam quisque id diam vel quam elementum. Enim ut tellus elementum sagittis vitae et leo.
+
+Quam vulputate dignissim suspendisse in est ante in nibh. Ornare suspendisse sed nisi lacus sed viverra tellus in. Et tortor consequat id porta. Placerat vestibulum lectus mauris ultrices eros. Felis eget velit aliquet sagittis id consectetur purus. Turpis nunc eget lorem dolor sed. Hendrerit dolor magna eget est. Gravida arcu ac tortor dignissim. Tempus quam pellentesque nec nam aliquam sem et tortor consequat. Pretium nibh ipsum consequat nisl vel pretium lectus quam. Sit amet nisl suscipit adipiscing. Habitant morbi tristique senectus et. Erat imperdiet sed euismod nisi porta lorem mollis. Nulla posuere sollicitudin aliquam ultrices sagittis. Id diam vel quam elementum pulvinar etiam non quam lacus. Nec tincidunt praesent semper feugiat. Aliquet sagittis id consectetur purus.

@@ -1,0 +1,47 @@
+
+```{r faculty_worklod_data_mung}
+library(utHelpR)
+library(dplyr)
+library(ngram)
+
+banner_source_dsn <- "BRPT"
+  
+contracted_workload_df <- read.csv( here::here("data/contracted_workload.csv") ) %>%
+  dplyr::select( c("sis_id", "term", "contracted_workload") ) %>%
+  dplyr::mutate( sis_id = stringr::str_pad(sis_id, 8, pad = '0') )
+
+faculty_term_df <- utHelpR::get_data_from_sql_file("faculty_workload/faculty_term.sql", banner_source_dsn) %>%
+    mutate( faculty_info=paste0(full_name, ' | D', sis_id) ) %>%
+    dplyr::left_join( contracted_workload_df, by=c("sis_id", "term") ) %>%
+    dplyr::mutate( contracted_workload=dplyr::if_else( grepl("Summer", term), 0, contracted_workload ) )
+
+
+instructional_faculty_workload_df <- utHelpR::get_data_from_sql_file("faculty_workload/faculty_term_instructional_workload.sql", banner_source_dsn) %>%
+    dplyr::left_join( faculty_term_df, by=c("sis_id", "term_code") )
+
+non_instructional_faculty_workload_df <- utHelpR::get_data_from_sql_file("faculty_workload/faculty_term_non_instructional_workload.sql", banner_source_dsn) %>%
+    dplyr::left_join( faculty_term_df, by=c("sis_id", "term_code") )
+
+
+summarized_faculty_workload_by_term <- get_summarized_faculty_workload_df(instructional_faculty_workload_df, 
+                                                                          non_instructional_faculty_workload_df, 
+                                                                          time_aggregator="term")
+
+ft_pt_department_grouping_df <- summarized_faculty_workload_by_term %>%
+  dplyr::filter( faculty_department %in% c("Biological Sciences", "Education", "Nursing") ) %>%
+  dplyr::mutate( faculty_ft_pt_status=dplyr::case_when( ( grepl('PT', faculty_status, fixed=TRUE) 
+                                                          & !grepl('|', faculty_status, fixed=TRUE) ) ~ 'Part-Time',
+                                                        faculty_status == 'Missing' ~ "Part-Time",
+                                                        TRUE ~ "Full-Time" ) ) %>%
+  dplyr::group_by( term, faculty_department, faculty_ft_pt_status ) %>%
+  dplyr::summarize( instructional_workload=sum(instructional_workload),
+                    non_instructional_workload=sum(non_instructional_workload),
+                    faculty_headcout=dplyr::n_distinct(sis_id)
+                    #, faculty_status_includes=ngram::concatenate(unique(faculty_status), collapse=', ') 
+                    ) %>%
+  dplyr::ungroup()
+
+
+writexl::write_xlsx(ft_pt_department_grouping_df, here::here('sensitive', 'ft_pt_department_grouping_faculty_workload.xlsx') )
+
+```

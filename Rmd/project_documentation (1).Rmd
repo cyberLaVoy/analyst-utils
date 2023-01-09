@@ -1,0 +1,53 @@
+---
+title: "Project Documentation"
+author: Office of Institutional Effectiveness
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: true
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+```
+
+```{r code}
+```
+
+# Project Purpose
+To make the IPEDS reporting process as easy and transparent as possible. All reports are now available at the click of a download button in the associated Shiny app.
+
+## Data Sources
+All data is currently being pulled from Edify. Original (older version) pulls directly from Banner.
+
+## Intended Audience
+IPEDS; the federal government
+
+# Project Timeline
+Project is complete, but can be improved.
+
+## Steps to Submit Reports
+1. Update data set
+    a. Set the pull_data variable in pull.R to TRUE
+    b. Either source pull.R or run Shiny app
+    c. Set the pull_data variable back to FALSE to allow Shiny app to load faster
+2. Run Shiny app
+    a. Adjust selected terms  
+    b. Click "Download Report" buttons 
+3. Submit downloaded reports to IPEDS
+
+## Due Dates
+All report must be submitted, validated, and locked by the second Wednesday of February.
+
+## Repetition Cycle
+Yearly
+
+## Maintainance
+There may be changes to filter logic, or report formats from year to year.
+
+## Future Development
+1. Once program data is fixed in Banner, the data from dsc_programs_all should no longer be needed.

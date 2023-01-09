@@ -1,0 +1,51 @@
+---
+title: "Faculty Status Analysis"
+author: "Office of Institutional Effectiveness"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+
+library(utHelpR)
+library(visdat)
+library(dplyr)
+
+```
+
+## Faculty - Position Relationship
+
+```{r}
+
+term_faculty_position_df <- utHelpR::get_data_from_sql_file("term_faculty_position.sql", 
+                                                            dsn="REPT") %>%
+  dplyr::filter( as.integer(term) >= 201840 )
+
+```
+### Missing Data
+
+```{r}
+
+visdat::vis_miss( term_faculty_position_df )
+
+```
+
+
+## Position - Status Relationship
+
+```{r}
+
+term_position_status_df <- utHelpR::get_data_from_sql_file("term_position_status.sql", 
+                                                            dsn="REPT") %>%
+  dplyr::filter( as.integer(term) >= 201840 )
+
+```
+
+### Missing Data
+
+```{r}
+
+visdat::vis_miss( term_position_status_df )
+
+```

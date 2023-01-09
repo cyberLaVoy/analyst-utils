@@ -1,0 +1,9 @@
+---
+title: "Email Example"
+output: blastula::blastula_email
+---
+
+This is an example of a scheduled email.
+
+```{r body}
+```

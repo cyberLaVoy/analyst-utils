@@ -1,0 +1,51 @@
+---
+title: "Pins Example"
+output: html_document
+resource_files:
+- rscripts/*
+- sql/*
+---
+
+## Code to Run on Schedule
+This code is meant to be run from a scheduled process, 
+separate from any reports, apps, dashboards, ect. that use the pinned data.
+```{r pin}
+library(pins)
+library(datasets)
+source(here::here("rscripts", "data_io_util.R"))
+# Obtain the API key from environment variable.
+api_key <- Sys.getenv("RSCONNECT_SERVICE_USER_API_KEY")
+if (api_key == "") {
+  api_key <- keyring::key_get("pins", "api_key") 
+}
+# Register the connection to the pinning board.
+board_register_rsconnect(key=api_key, server="") # fill in
+# pull the data to pin
+#data <- get_data_from_sql("example.sql")
+data <- iris
+# pin name can be any unique name
+pin_name <- "example_data_source"
+# pin the data to the board
+pin(data, pin_name, board="rsconnect")
+```
+
+## Example on Pulling from Pin
+This would be the code to run from a report, app, dashboard, etc. after 
+setting up a scheduled process for pinning the data.
+```{r pull}
+library(DT)
+# Obtain the API key from environment variable.
+api_key <- Sys.getenv("RSCONNECT_SERVICE_USER_API_KEY")
+if (api_key == "") {
+  api_key <- keyring::key_get("pins", "api_key") 
+}
+# Register the connection to the pinning board.
+board_register_rsconnect(key=api_key, server="") # fill in
+# pin name set from original pin
+pin_name <- "example_data_source"
+# pull data from the pin
+data <- pin_get(pin_name, board="rsconnect")
+# display the data pulled from pin
+DT::datatable(data, rownames=FALSE)
+```
+

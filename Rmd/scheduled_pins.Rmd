@@ -1,0 +1,182 @@
+---
+title: "Scheduled Pins"
+author: ""
+date: ""
+output: html_document
+resource_files:
+- R/*
+- sql/*
+- data/*
+---
+
+```{r setup}
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+
+library(pins)
+library(utHelpR)
+library(dplyr)
+library(here)
+library(tidyr)
+library(datasets)
+source( here::here("R", "etl_util.R") )
+
+banner_source_dsn <- "REPT"
+
+```
+
+
+```{r setup_pins_environment}
+# Obtain the API key from environment variable.
+api_key <- Sys.getenv("RSCONNECT_SERVICE_USER_API_KEY")
+# Register the connection to the pinning board.
+rsconnect_board <- board_rsconnect(auth="manual",
+                                   account="", # fill in
+                                   server="", # fill in
+                                   key=api_key)
+```
+
+One of the Connect APIs that pins uses, /v1/content, was only introduced in Connect 1.8.6. Prior to that, it was an experimental API and so was not stable or available on the same path.
+
+Anybody else encountering the same issue should consider upgrading their Connect instance.
+
+```{r initial_test_pin} 
+  httr::with_verbose(data_out=TRUE, 
+                     data_in=TRUE, 
+                     info=TRUE, 
+                     ssl=TRUE, 
+                     expr = { pin_write(rsconnect_board, iris, name="initial_test_pin", type="rds") } )
+```
+
+```{r apr_supplemental_pins}
+  apr_supplemental_df <- read.csv( here::here("data/apr_supplemental_data.csv") )
+  pin_name <- "apr_supplemental_pin"
+  pin_write(rsconnect_board, apr_supplemental_df, pin_name)
+```
+
+```{r faculty_worklod_data_mung}
+
+contracted_workload_df <- read.csv( here::here("data/contracted_workload.csv") ) %>%
+  dplyr::select( c("sis_id", "term", "contracted_workload") ) %>%
+  dplyr::mutate( sis_id = stringr::str_pad(sis_id, 8, pad = '0') )
+
+faculty_term_df <- utHelpR::get_data_from_sql_file("faculty_workload/faculty_term.sql", banner_source_dsn) %>%
+    mutate( faculty_info=paste0(full_name, ' | D', sis_id) ) %>%
+    dplyr::left_join( contracted_workload_df, by=c("sis_id", "term") ) %>%
+    dplyr::mutate( contracted_workload=dplyr::if_else( grepl("Summer", term), 0, contracted_workload ) )
+
+
+instructional_faculty_workload_df <- utHelpR::get_data_from_sql_file("faculty_workload/faculty_term_instructional_workload.sql", banner_source_dsn) %>%
+    dplyr::left_join( faculty_term_df, by=c("sis_id", "term_code") )
+
+non_instructional_faculty_workload_df <- utHelpR::get_data_from_sql_file("faculty_workload/faculty_term_non_instructional_workload.sql", banner_source_dsn) %>%
+    dplyr::left_join( faculty_term_df, by=c("sis_id", "term_code") )
+
+
+summarized_faculty_workload_by_term <- get_summarized_faculty_workload_df(instructional_faculty_workload_df, 
+                                                                          non_instructional_faculty_workload_df, 
+                                                                          time_aggregator="term")
+
+summarized_faculty_workload_by_academic_year <- get_summarized_faculty_workload_df(instructional_faculty_workload_df, 
+                                                                                   non_instructional_faculty_workload_df, 
+                                                                                   time_aggregator="academic_year")
+
+```
+
+```{r facutly_workload_pins}
+
+# faculty workload pin 1
+pin_name <- "instructional_faculty_workload_pin"
+pin_write(rsconnect_board, instructional_faculty_workload_df, pin_name)
+
+# faculty workload pin 2
+pin_name <- "non_instructional_faculty_workload_pin"
+pin_write(rsconnect_board, non_instructional_faculty_workload_df, pin_name)
+
+# faculty workload pin 3
+pin_name <- "summarized_faculty_workload_by_term_pin"
+pin_write(rsconnect_board, summarized_faculty_workload_by_term, pin_name)
+
+# faculty workload pin 4
+pin_name <- "summarized_faculty_workload_by_academic_year_pin"
+pin_write(rsconnect_board, summarized_faculty_workload_by_academic_year, pin_name)
+
+# faculty workload pin 5
+pin_name <- "faculty_term_pin"
+pin_write(rsconnect_board, faculty_term_df, pin_name)
+
+```
+
+```{r student_type_data_mung}
+
+# Hard coded parameter terms.
+# Note: BOTH of these will need to be manually updated.
+calculated_student_types_parameter_term <- '202240'
+calculated_student_types_term_two_terms_ago <- '202220'
+
+# STUDENT TYPE DATA ####
+
+student_type_determination_variables <- utHelpR::get_data_from_sql_file("student_type_audit/student_type_determination_variables.sql", dsn="edify") 
+
+calculated_student_types <- calculate_student_types(student_type_determination_variables, 
+                                                    calculated_student_types_parameter_term, 
+                                                    calculated_student_types_term_two_terms_ago) 
+ 
+```
+
+```{r student_type_pins}
+# student type audit pin 1
+pin_name <- "student_type_audit_student_type_determination_variables_pin"
+pin_write(rsconnect_board, student_type_determination_variables, pin_name)
+
+# student type audit pin 2
+pin_name <- "student_type_audit_calculated_student_types_pin"
+pin_write(rsconnect_board, calculated_student_types, pin_name)
+```
+
+
+```{r audit_reports_pins }
+
+# audit report pin 1
+data <- utHelpR::get_data_from_sql_file("audit_reports/audit_reports_students.sql", 
+                                        banner_source_dsn)
+pin_name <- "audit_reports_students_pin"
+pin_write(rsconnect_board, data, pin_name)
+
+# audit report pin 2
+data <- utHelpR::get_data_from_sql_file("audit_reports/audit_reports_courses.sql", 
+                                        banner_source_dsn)
+pin_name <- "audit_reports_courses_pin"
+pin_write(rsconnect_board, data, pin_name)
+
+# audit report pin 3
+data <- utHelpR::get_data_from_sql_file("audit_reports/audit_reports_spbpers.sql", 
+                                        banner_source_dsn)
+pin_name <- "audit_reports_spbpers_pin"
+pin_write(rsconnect_board, data, pin_name)
+
+# audit report pin 4
+data <- utHelpR::get_data_from_sql_file("audit_reports/audit_reports_sorhsch.sql", 
+                                        banner_source_dsn)
+pin_name <- "audit_reports_sorhsch_pin"
+pin_write(rsconnect_board, data, pin_name)
+
+# audit report pin 5
+data <- utHelpR::get_data_from_sql_file("audit_reports/audit_reports_goradid.sql", 
+                                        banner_source_dsn)
+pin_name <- "audit_reports_goradid_pin"
+pin_write(rsconnect_board, data, pin_name)
+
+# audit report pin 6
+data <- utHelpR::get_data_from_sql_file("audit_reports/audit_reports_student_courses.sql", 
+                                        banner_source_dsn)
+pin_name <- "audit_reports_student_courses_pin"
+pin_write(rsconnect_board, data, pin_name)
+
+# audit report pin 7
+data <- utHelpR::get_data_from_sql_file("audit_reports/audit_reports_perkins_courses.sql", 
+                                        banner_source_dsn)
+pin_name <- "audit_reports_perkins_courses"
+pin_write(rsconnect_board, data, pin_name)
+
+```

@@ -1,0 +1,18 @@
+---
+title: "Diagnosis"
+author: "Brenten Canfield"
+date: "8/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r diagnose}
+Sys.getenv()
+system("env")
+system("ldd /opt/rstudio-drivers/oracle/bin/lib/liboracleodbc_sb64.so")
+system("echo 'SELECT 1 FROM DUAL' | isql oracle")
+```

@@ -1,0 +1,120 @@
+---
+title: "Data IO Connections with R"
+author: "Office of Institutional Effectiveness"
+output: html_document
+runtime: shiny
+resource_files:
+- r/data_io_util.R
+- sql/*
+- misc/*
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+```
+
+# {.tabset}
+
+## Data IO Connections 
+
+### Loading all libraries and functions needed
+#### IMPORTANT: data_io_util.R file will need to be copied over to any separate project.
+```{r server-side}
+library(here)
+source(here::here("r", "data_io_util.R"))
+```
+
+### Setting up keyring (Banner, Edify, and Pins)
+#### Note how the service argument, in the call to key_set function, is changed for all separate credentials saved.
+```{r keyring, eval=FALSE}
+library(keyring)
+
+### Banner
+# for storing an individual's username
+keyring::key_set(service="sis_db", username="username")
+# for storing an individual's password
+keyring::key_set(service="sis_db", username="password")
+
+### Edify
+# for storing an individual's username
+keyring::key_set(service="edify", username="username")
+# for storing an individual's password
+keyring::key_set(service="edify", username="password")
+
+### Pins
+# for storing the API key for pins on RStudio Connect
+keyring::key_set(service="pins", username="api_key")
+
+```
+
+### Pull data via prebuilt function (Banner, Edify, and Pins)
+```{r prebuilt}
+library(DT)
+library(tidyverse)
+
+### Banner
+# Function assumes that "query.sql" is located in a folder called "sql".
+df <- get_data_from_sql_file(file_name="query.sql",
+                             dsn="REPT")
+# display data pulled in table
+DT::datatable(df, rownames=FALSE)
+
+### Edify
+# Function assumes that "edify_query.sql" is located in a folder called "sql".
+df <- get_data_from_sql_file(file_name="edify_query.sql",
+                             dsn="edify")
+# display data pulled in table
+DT::datatable(df, rownames=FALSE)
+
+### Pins
+# Function assumes that "edify_query.sql" is located in a folder called "sql".
+df <- get_data_from_pin(pin_name="student_type_audit_student_type_determination_variables_pin") %>%
+  # only a random sample of data displayed to improve load time
+  sample_n(100)
+# display data pulled in table
+DT::datatable(df, 
+              rownames=FALSE,
+              # allow for horizontal scrolling, when width of data goes off page
+              options=list( scrollX = TRUE ))
+
+
+```
+
+
+## Contents of data_io_util.R
+```{r comment='', echo=FALSE}
+r_content <- read_file( here::here("r", "data_io_util.R") )
+```
+```{r, code=r_content,eval=FALSE}
+```
+
+
+## Example DSN Entries
+
+### Finding file locations with terminal
+```{bash, eval=FALSE}
+odbcinst -j
+```
+### File contents of odbcinst.ini
+```{r comment='', echo=FALSE}
+cat(readLines(here::here("misc", "example_odbcinst.ini")), sep = '\n')
+```
+
+### File contents of odbc.ini
+```{r comment='', echo=FALSE}
+cat(readLines(here::here("misc", "example_odbc.ini")), sep = '\n')
+```
+
+
+## Aditional Information
+
+### For Windows Users (informational only)
+#### Changing Oracle driver name:
+Oracle in instantclient* is set by odbc_install.exe and can be altered if you change the registry:
+
+1. In HKEY_LOCAL_MACHINE\SOFTWARE\ODBC\ODBCINST.INI\ODBC Drivers, change the name of "Oracle in instantclient*" to whatever you want.
+
+2. Rename the, "Oracle in instantclient*" key in HKEY_LOCAL_MACHINE\SOFTWARE\ODBC\ODBCINST.INI to the same name you used above.
+
+\
+\

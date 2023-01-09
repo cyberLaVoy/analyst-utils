@@ -1,0 +1,25 @@
+
+
+```{r}
+library(dplyr)
+library(utHelpR)
+
+print("Pulling summarized workload data...")
+summarized_faculty_workload_by_term_df <- utHelpR::get_data_from_pin("summarized_faculty_workload_by_term_pin")
+
+ft_pt_department_grouping_df <- summarized_faculty_workload_by_term_df %>%
+  dplyr::filter(faculty_department %in% c("Biological Sciences", "Education", "Nursing") &
+                instructional_workload != 0) %>%
+  dplyr::mutate( faculty_ft_pt_status=dplyr::case_when( ( grepl('PT', faculty_status, fixed=TRUE) & !grepl('|', faculty_status, fixed=TRUE) ) ~ 'Part-Time',
+                                                        faculty_status == 'Missing' ~ "Part-Time",
+                                                        TRUE ~ "Full-Time" ) ) %>%
+  dplyr::group_by( term, faculty_department, faculty_ft_pt_status ) %>%
+  dplyr::summarize( instructional_workload=sum(instructional_workload),
+                    non_instructional_workload=sum(non_instructional_workload),
+                    faculty_headcout=dplyr::n_distinct(sis_id)
+                    #, faculty_status_includes=ngram::concatenate(unique(faculty_status), collapse=', ') 
+                    ) %>%
+  dplyr::ungroup()
+
+
+```

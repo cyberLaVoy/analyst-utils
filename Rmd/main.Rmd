@@ -1,0 +1,29 @@
+---
+title: "Scheduled Script"
+output: html_document
+---
+
+```{r imports}
+library(blastula)
+library(knitr)
+library(datasets)
+library(tidyverse)
+```
+
+```{r body}
+plot(iris)
+knitr::kable(iris)
+```
+
+```{r attachments}
+write_csv(iris, "iris.csv")
+```
+
+```{r email}
+  attach_connect_email(
+    render_connect_email(input="email.Rmd"),
+    subject = "RStudio Connect HTML Email",
+    attach_output = TRUE,
+    attachments = c("iris.csv")
+  )
+```
